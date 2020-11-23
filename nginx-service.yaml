@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-s
+  labels:
+    app: nginx
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-d
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - image: steedos/nginx-logrotate:1.17.7
+          name: nginx
+          ports:
+            - containerPort: 80
+          # volumeMounts:
+          # - mountPath: /etc/nginx/conf.d/docker.conf
+          #   name: docker-conf
+      # volumes:
+      # - name: docker-conf
+      #   hostPath:
+      #       path: ./docker/nginx/docker.conf
+      #       type: File
