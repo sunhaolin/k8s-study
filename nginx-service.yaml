@@ -39,5 +39,5 @@ spec:
       volumes:
       - name: docker-conf
         hostPath:
-            path: ./docker/nginx/docker.conf
+            path: /srv/git/k8s-study/docker/nginx/docker.conf
             type: File
