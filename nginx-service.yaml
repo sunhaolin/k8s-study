@@ -33,11 +33,11 @@ spec:
           name: nginx
           ports:
             - containerPort: 80
-          # volumeMounts:
-          # - mountPath: /etc/nginx/conf.d/docker.conf
-          #   name: docker-conf
-      # volumes:
-      # - name: docker-conf
-      #   hostPath:
-      #       path: ./docker/nginx/docker.conf
-      #       type: File
+          volumeMounts:
+          - mountPath: /etc/nginx/conf.d/docker.conf
+            name: docker-conf
+      volumes:
+      - name: docker-conf
+        hostPath:
+            path: ./docker/nginx/docker.conf
+            type: File
