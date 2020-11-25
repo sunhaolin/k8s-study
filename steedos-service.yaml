@@ -5,9 +5,9 @@ metadata:
     app: steedos
   name: steedos
 spec:
+  type: NodePort
   ports:
-  - name: "5080"
-    port: 5080
+  - port: 5080
     targetPort: 5080
   selector:
     app: steedos
@@ -23,8 +23,6 @@ spec:
   selector:
     matchLabels:
       app: steedos
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
