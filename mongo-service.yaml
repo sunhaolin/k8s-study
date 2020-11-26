@@ -12,26 +12,14 @@ spec:
   selector:
     app: mongo
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  labels:
-    app: mongo-claim0
-  name: mongo-claim0
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 100Mi
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   labels:
     app: mongo
   name: mongo
 spec:
+  serviceName: mongo
   replicas: 1
   selector:
     matchLabels:
@@ -56,19 +44,26 @@ spec:
             - containerPort: 27017
           volumeMounts:
             - mountPath: /data/db
-              name: mongo-claim0
-      volumes:
-        - name: mongo-claim0
-          persistentVolumeClaim:
-            claimName: mongo-claim0
+              name: mongo-data
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: slow
+        resources:
+          requests:
+            storage: 10Mi
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   labels:
     app: mongo-init-replica
   name: mongo-init-replica
 spec:
+  serviceName: mongo
   replicas: 1
   selector:
     matchLabels:
@@ -94,3 +89,11 @@ spec:
                 done; (exit $s)
           image: mongo:4.2
           name: mongo-init-replica
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: slow
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-standard

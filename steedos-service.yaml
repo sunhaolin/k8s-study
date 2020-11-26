@@ -7,18 +7,19 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - port: 5080
-    targetPort: 5080
+    - port: 5080
+      targetPort: 5080
   selector:
     app: steedos
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   labels:
     app: steedos
   name: steedos
 spec:
+  serviceName: steedos
   replicas: 1
   selector:
     matchLabels:
@@ -29,40 +30,41 @@ spec:
         app: steedos
     spec:
       containers:
-      - env:
-        - name: MONGO_OPLOG_URL
-          value: mongodb://mongo:27017/local
-        - name: MONGO_URL
-          value: mongodb://mongo:27017/steedos
-        - name: PORT
-          value: "5080"
-        - name: ROOT_URL
-          value: http://localhost:5080
-        - name: STEEDOS_CFS_STORE
-          value: local
-        - name: STEEDOS_STORAGE_DIR
-          value: /app/storage
-        image: steedos/steedos-project-oa:1.22.1
-        name: steedos
-        ports:
-        - containerPort: 5080
-        volumeMounts:
-        - mountPath: /app/storage
-          name: steedos-claim0
-      volumes:
-      - name: steedos-claim0
-        persistentVolumeClaim:
-          claimName: steedos-claim0
+        - env:
+            - name: MONGO_OPLOG_URL
+              value: mongodb://mongo:27017/local
+            - name: MONGO_URL
+              value: mongodb://mongo:27017/steedos
+            - name: PORT
+              value: "5080"
+            - name: ROOT_URL
+              value: http://localhost:5080
+            - name: STEEDOS_CFS_STORE
+              value: local
+            - name: STEEDOS_STORAGE_DIR
+              value: /app/storage
+          image: steedos/steedos-project-oa:1.22.1
+          name: steedos
+          ports:
+            - containerPort: 5080
+          volumeMounts:
+            - mountPath: /app/storage
+              name: steedos-data
+  volumeClaimTemplates:
+    - metadata:
+        name: steedos-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: fast
+        resources:
+          requests:
+            storage: 10Mi
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
 metadata:
-  labels:
-    app: steedos-claim0
-  name: steedos-claim0
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 100Mi
+  name: fast
+provisioner: k8s.io/minikube-hostpath
+parameters:
+  type: pd-ssd
