@@ -9,25 +9,26 @@ spec:
   ports:
     - port: 27017
       targetPort: 27017
+  clusterIP: None
   selector:
-    app: mongo
+    role: mongo
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   labels:
-    app: mongo
+    role: mongo
   name: mongo
 spec:
   serviceName: mongo
   replicas: 1
   selector:
     matchLabels:
-      app: mongo
+      role: mongo
   template:
     metadata:
       labels:
-        app: mongo
+        role: mongo
     spec:
       containers:
         - args:
@@ -44,56 +45,27 @@ spec:
             - containerPort: 27017
           volumeMounts:
             - mountPath: /data/db
-              name: mongo-data
+              name: mongo-persistent-storage
+        - name: mongo-sidecar
+          image: cvallance/mongo-k8s-sidecar
+          env:
+            - name: MONGO_SIDECAR_POD_LABELS
+              value: "role=mongo,environment=test"
   volumeClaimTemplates:
     - metadata:
-        name: mongo-data
+        name: mongo-persistent-storage
       spec:
         accessModes:
           - ReadWriteOnce
-        storageClassName: slow
+        storageClassName: fast
         resources:
           requests:
-            storage: 10Mi
+            storage: 100Mi
 ---
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  labels:
-    app: mongo-init-replica
-  name: mongo-init-replica
-spec:
-  serviceName: mongo
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mongo-init-replica
-  template:
-    metadata:
-      labels:
-        app: mongo-init-replica
-    spec:
-      containers:
-        - args:
-            - bash
-            - -c
-            - |-
-              for i in `seq 1 30`; do
-                  mongo mongo/steedos --eval "
-                    rs.initiate({
-                      _id: 'rs0',
-                      members: [ { _id: 0, host: 'localhost:27017' } ]})" &&
-                  s=$? && break || s=$?;
-                  echo "Tried $i times. Waiting 5 secs...";
-                  sleep 5;
-                done; (exit $s)
-          image: mongo:4.2
-          name: mongo-init-replica
----
-apiVersion: storage.k8s.io/v1
 kind: StorageClass
+apiVersion: storage.k8s.io/v1
 metadata:
-  name: slow
+  name: fast
 provisioner: kubernetes.io/gce-pd
 parameters:
-  type: pd-standard
+  type: pd-ssd
