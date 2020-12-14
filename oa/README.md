@@ -25,4 +25,8 @@ kubectl apply -f mongo_sta_nodeport.yaml
 kubectl exec -it mongo-0 -- mongo
 ```
 
-##
+## 启动 oa
+
+```
+db.getMongo().setSlaveOk();
+```

@@ -31,10 +31,8 @@ spec:
     spec:
       containers:
         - env:
-            - name: MONGO_OPLOG_URL
-              value: mongodb://mongo:27017/local
             - name: MONGO_URL
-              value: mongodb://mongo:27017/steedos
+              value: mongodb://mongo-0.mongo.default.svc.cluster.local:27017/steedos?replicaSet=rs0
             - name: PORT
               value: "5080"
             - name: ROOT_URL
@@ -53,18 +51,10 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: steedos-data
+        annotations:
+          volume.beta.kubernetes.io/storage-class: "nfs-storageclass" #指定上面创建的NFS存储类，用于持久化存储mongoDB数据库文件；
       spec:
-        accessModes:
-          - ReadWriteOnce
-        storageClassName: fast
+        accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 10Mi
----
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: fast
-provisioner: k8s.io/minikube-hostpath
-parameters:
-  type: pd-ssd
+            storage: 1Gi
