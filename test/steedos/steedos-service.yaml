@@ -32,7 +32,7 @@ spec:
       containers:
         - env:
             - name: MONGO_URL
-              value: mongodb://mongo-0.mongo.default.svc.cluster.local:27017/steedos?replicaSet=rs0
+              value: mongodb://mongo-0.mongo,mongo-1.mongo,mongo-2.mongo:27017/steedos?replicaSet=rs0
             - name: PORT
               value: "5080"
             - name: ROOT_URL

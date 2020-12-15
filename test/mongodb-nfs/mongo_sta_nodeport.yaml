@@ -49,7 +49,7 @@ spec:
     matchLabels:
       app: mongo
   serviceName: "mongo"
-  replicas: 2 #3个副本；
+  replicas: 3 #3个副本；
   template:
     metadata:
       labels:
