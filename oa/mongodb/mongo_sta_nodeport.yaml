@@ -80,10 +80,9 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: mongo-persistent-storage
-        annotations:
-          volume.beta.kubernetes.io/storage-class: "nfs-storageclass" #指定上面创建的NFS存储类，用于持久化存储mongoDB数据库文件；
       spec:
         accessModes: ["ReadWriteOnce"]
+        storageClassName: "nfs-storageclass" #指定上面创建的NFS存储类，用于持久化存储mongoDB数据库文件；
         resources:
           requests:
             storage: 1Gi
