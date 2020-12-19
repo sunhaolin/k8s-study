@@ -26,11 +26,11 @@ spec:
             - name: PROVISIONER_NAME
               value: jim.com/nfs #可自定义
             - name: NFS_SERVER
-              value: "192.168.0.153" #对应NFS服务器IP地址
+              value: "192.168.0.144" #对应NFS服务器IP地址
             - name: NFS_PATH
-              value: /srv/kubedata #对应NFS配置好的共享目录
+              value: /kubedata #对应NFS配置好的共享目录
       volumes:
         - name: nfs-client-root
           nfs:
-            server: "192.168.0.153" #对应NFS服务器IP地址
-            path: /srv/kubedata #对应NFS配置好的共享目录
+            server: "192.168.0.144" #对应NFS服务器IP地址
+            path: /kubedata #对应NFS配置好的共享目录
